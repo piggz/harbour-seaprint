@@ -416,7 +416,11 @@ void IppPrinter::print(QJsonObject attrs, QString filename,
                                 }
                                 }
                             }
-                          }
+                          },
+                        {"media-left-margin", QJsonObject{{"tag", IppMsg::Integer}, {"value", 0}}},
+                        {"media-right-margin", QJsonObject{{"tag", IppMsg::Integer}, {"value", 0}}},
+                        {"media-top-margin", QJsonObject{{"tag", IppMsg::Integer}, {"value", 0}}},
+                        {"media-bottom-margin", QJsonObject{{"tag", IppMsg::Integer}, {"value", 0}}}
                     }
                 }
             }
