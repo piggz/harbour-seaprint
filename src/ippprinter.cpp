@@ -164,6 +164,7 @@ void IppPrinter::printRequestFinished(QNetworkReply *reply)
 {
     _jobAttrs = QJsonObject();
     bool status = false;
+    qDebug() << "Finished:" << reply->readAll();
     if(reply->error()  == QNetworkReply::NoError)
     {
         try {
@@ -403,13 +404,36 @@ void IppPrinter::print(QJsonObject attrs, QString filename,
         attrs.remove("sides");
     }
 
+    //PGZ TEMP
+    QJsonObject mediacol
+    {
+        QJsonObject {{"tag", IppMsg::BeginCollection}, {"value",
+                    QJsonObject{
+                            {"media-size", QJsonObject{{"tag", IppMsg::BeginCollection}, {"value",
+                                QJsonObject {
+                                    {"x-dimension", QJsonObject{{"tag", IppMsg::Integer}, {"value", 12700}}},
+                                    {"y-dimension", QJsonObject{{"tag", IppMsg::Integer}, {"value", 17780}}}
+                                }
+                                }
+                            }
+                          }
+                    }
+                }
+            }
+
+    };
+    attrs.insert("media-col", mediacol);
+    //END
+
     qDebug() << "Final job attributes:" << attrs;
 
     IppMsg job = IppMsg(o, attrs);
     QByteArray contents = job.encode(IppMsg::PrintJob);
                                        // Always convert images to get resizing
-    if((mimeType == documentFormat) && !mimeType.contains("image"))
-    {
+    //if((mimeType == documentFormat) && !mimeType.contains("image"))
+    //{
+        qDebug() << "Contents:" << contents;
+
         QByteArray filedata = file.readAll();
         contents = contents.append(filedata);
         file.close();
@@ -417,8 +441,9 @@ void IppPrinter::print(QJsonObject attrs, QString filename,
         setBusyMessage("Transferring");
         QNetworkReply* reply = _print_nam->post(request, contents);
         connect(reply, &QNetworkReply::uploadProgress, this, &IppPrinter::setProgress);
-    }
-    else
+        return;
+    //}
+    //else
     {
         file.close();
 
